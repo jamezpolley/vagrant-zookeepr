@@ -1,0 +1,38 @@
+---
+
+- hosts: all
+  vars:
+    zookeepr_base: /vagrant/zookeepr
+  tasks:
+  - name: install required packages
+    apt: name={{ item }} state=present
+    become: true
+    with_items:
+      - libjpeg-dev
+      - libpq-dev
+      - libpython-dev
+      - libxslt1-dev
+      - libxml2-dev
+      - postgresql
+      - python-virtualenv
+      - zlib1g-dev
+      - git
+  - pip: name={{ item }} state=latest
+    become: true
+    with_items:
+      - pip
+      - psycopg2
+  - postgresql_user: name=zookeepr password=zookeepr
+    become: true
+    become_user: postgres
+  - postgresql_db: name=zookeepr owner=zookeepr
+    become: true
+    become_user: postgres
+  - file: path={{ zookeepr_base }} state=directory
+  - file: path={{ zookeepr_base }}/build state=absent
+  - pip: virtualenv={{ zookeepr_base }} name={{ item }}
+    with_items:
+      - 'file:///vagrant/src/Imaging-1.1.7.tar.gz'
+  - pip: virtualenv={{ zookeepr_base }} name={{ item }}
+    with_items:
+      - 'file:///vagrant/src/zookeepr'
